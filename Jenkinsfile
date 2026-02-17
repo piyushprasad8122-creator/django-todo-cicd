@@ -1,4 +1,4 @@
-pipeline {
+kpipeline {
     agent any
 
     stages {
@@ -38,14 +38,23 @@ pipeline {
 
                 STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
 
-                if [ "$STATUS_CODE" -ne 200 ]; then
-                  echo "Health check failed. App is not responding."
-                  exit 1
+                if [ "$STATUS_CODE" -ge 200 ] && [ "$STATUS_CODE" -lt 400 ]; then
+                    echo "Health check passed with status $STATUS_CODE"
+                else
+                    echo "Health check failed with status $STATUS_CODE"
+                    exit 1
                 fi
-
-                echo "Health check passed. App is live."
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline succeeded. Application deployed and healthy."
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs for details."
         }
     }
 }

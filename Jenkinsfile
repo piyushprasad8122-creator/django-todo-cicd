@@ -62,7 +62,7 @@ pipeline {
                 Console Output:
                 ${env.BUILD_URL}
                 """,
-                to: "yourmail@gmail.com"
+                to: "piyushprasad8122@gmail.com"
             )
         }
     }

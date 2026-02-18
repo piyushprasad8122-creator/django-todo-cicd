@@ -43,7 +43,7 @@ pipeline {
                 echo "Waiting for application to start..."
                 sleep 10
 
-                STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:9999)
+                STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
 
                 if [ "$STATUS_CODE" -lt 200 ] || [ "$STATUS_CODE" -ge 400 ]; then
                   echo "Health check failed with status code: $STATUS_CODE"

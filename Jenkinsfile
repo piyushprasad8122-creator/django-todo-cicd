@@ -1,6 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        APP_NAME = "todo-app"
+        CONTAINER_NAME = "todo-app-container"
+        APP_PORT = "8000"
+        EMAIL_TO = "piyushprasad8122@gmail.com"
+    }
+
     stages {
 
         stage('Checkout Code') {
@@ -12,20 +19,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t todo-app .'
+                sh 'docker build -t $APP_NAME .'
             }
         }
 
         stage('Deploy Application') {
             steps {
                 sh '''
-                docker stop todo-app-container || true
-                docker rm todo-app-container || true
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
 
                 docker run -d \
-                  --name todo-app-container \
-                  -p 8000:8000 \
-                  todo-app
+                  --name $CONTAINER_NAME \
+                  -p $APP_PORT:$APP_PORT \
+                  $APP_NAME
                 '''
             }
         }
@@ -39,11 +46,11 @@ pipeline {
                 STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
 
                 if [ "$STATUS_CODE" -lt 200 ] || [ "$STATUS_CODE" -ge 400 ]; then
-                  echo "Health check failed"
+                  echo "Health check failed with status code: $STATUS_CODE"
                   exit 1
                 fi
 
-                echo "Health check passed"
+                echo "Health check passed with status code: $STATUS_CODE"
                 '''
             }
         }
@@ -52,17 +59,29 @@ pipeline {
     post {
         failure {
             emailext(
-                subject: "❌ Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                to: "${EMAIL_TO}",
+                subject: "❌ Jenkins FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                Build FAILED
+Hello,
 
-                Job: ${env.JOB_NAME}
-                Build: ${env.BUILD_NUMBER}
+Your Jenkins pipeline has FAILED.
 
-                Console Output:
-                ${env.BUILD_URL}
-                """,
-                to: "yourmail@gmail.com"
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Status: FAILURE
+
+Failed Stage:
+${env.STAGE_NAME}
+
+Error:
+${currentBuild.currentResult}
+
+Console Log:
+${env.BUILD_URL}console
+
+Regards,
+Jenkins
+"""
             )
         }
     }

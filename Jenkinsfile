@@ -6,7 +6,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'develop',
-                    url: 
+                    url: 'https://github.com/piyushprasad8122-creator/django-todo-cicd.git'
             }
         }
 
@@ -62,7 +62,7 @@ pipeline {
                 Console Output:
                 ${env.BUILD_URL}
                 """,
-                to: "piyushprasad8122@gmail.com"
+                to: "yourmail@gmail.com"
             )
         }
     }

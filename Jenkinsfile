@@ -38,23 +38,32 @@ pipeline {
 
                 STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
 
-                if [ "$STATUS_CODE" -ge 200 ] && [ "$STATUS_CODE" -lt 400 ]; then
-                    echo "Health check passed with status $STATUS_CODE"
-                else
-                    echo "Health check failed with status $STATUS_CODE"
-                    exit 1
+                if [ "$STATUS_CODE" -lt 200 ] || [ "$STATUS_CODE" -ge 400 ]; then
+                  echo "Health check failed"
+                  exit 1
                 fi
+
+                echo "Health check passed"
                 '''
             }
         }
     }
 
     post {
-        success {
-            echo "✅ Pipeline succeeded. Application deployed and healthy."
-        }
         failure {
-            echo "❌ Pipeline failed. Check logs for details."
+            emailext(
+                subject: "❌ Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                Build FAILED
+
+                Job: ${env.JOB_NAME}
+                Build: ${env.BUILD_NUMBER}
+
+                Console Output:
+                ${env.BUILD_URL}
+                """,
+                to: "yourmail@gmail.com"
+            )
         }
     }
 }

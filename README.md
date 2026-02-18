@@ -1,40 +1,39 @@
-🚀 Django Todo App – CI/CD with Jenkins & Docker
+# Django Todo App – CI/CD Pipeline with Jenkins & Docker
 
-This project demonstrates a complete CI/CD pipeline using Jenkins, Docker, and GitHub to build, deploy, monitor, and notify failures for a Django-based Todo application.
+This repository demonstrates a **production-style CI/CD pipeline** built using **Jenkins** and **Docker** for a Django Todo application.  
+The project focuses on automating build, deployment, health checks, and failure notifications using industry best practices.
 
-It is designed as a learning + resume-ready DevOps project covering real-world CI/CD practices.
+---
 
-📌 Project Overview
+## 🚀 Project Overview
 
-The pipeline automatically performs the following actions whenever code is pushed to the repository:
+The CI/CD pipeline automatically:
 
-Pulls source code from GitHub
+- Pulls code from GitHub
+- Builds a Docker image for the Django application
+- Runs database migrations inside the container
+- Deploys the application using Docker
+- Performs an application health check
+- Sends **email notifications on pipeline failure**
 
-Builds a Docker image for the Django application
+This project is designed to showcase **real-world DevOps workflows**, not just basic automation.
 
-Runs database migrations inside the container
+---
 
-Deploys the application using Docker
+## 🧰 Tech Stack
 
-Performs a health check on the running application
+- **Application**: Django 3.2
+- **CI/CD**: Jenkins (Declarative Pipeline)
+- **Containerization**: Docker
+- **Version Control**: Git & GitHub
+- **Notifications**: Jenkins Email Extension (Gmail SMTP)
+- **OS / Platform**: Ubuntu (AWS EC2)
 
-Sends an email notification if the pipeline fails
+---
 
-🧱 Tech Stack
+## 📂 Repository Structure
 
-Backend: Django 3.2
 
-CI/CD: Jenkins (Declarative Pipeline)
-
-Containerization: Docker
-
-Source Control: Git & GitHub
-
-Notifications: Jenkins Email Extension (Gmail SMTP)
-
-OS: Ubuntu (EC2)
-
-📂 Repository Structure
 .
 ├── Dockerfile
 ├── Jenkinsfile
@@ -43,102 +42,85 @@ OS: Ubuntu (EC2)
 ├── todos/
 ├── templates/
 └── README.md
-🔧 Jenkins Pipeline Stages
-1️⃣ Checkout Code
 
-Pulls the develop branch from GitHub.
 
-2️⃣ Build Docker Image
+---
 
-Builds a Docker image using python:3.9 for Django compatibility.
+## ⚙️ Jenkins Pipeline Stages
 
-3️⃣ Deploy Application
+### 1. Checkout Code
+- Fetches the `develop` branch from GitHub.
 
-Stops and removes any existing container.
+### 2. Build Docker Image
+- Builds a Docker image using Python 3.9 for Django compatibility.
 
-Runs a new container on port 8000.
+### 3. Deploy Application
+- Stops and removes any existing container.
+- Runs a new container on port `8000`.
 
-4️⃣ Health Check
+### 4. Health Check
+- Waits for the application to start.
+- Validates application availability using HTTP status codes (2xx–3xx).
+- Fails the pipeline if the application is unreachable.
 
-Waits for the application to start.
+### 5. Failure Notification
+- Sends an email alert when the pipeline fails.
+- Includes job name, build number, and console log URL for quick debugging.
 
-Validates the app using HTTP status codes (2xx–3xx).
+---
 
-Fails the pipeline if the app is unreachable.
+## 📧 Email Notification Details
 
-5️⃣ Email Notification (on Failure)
+- Implemented using **Jenkins Email Extension Plugin**
+- Gmail SMTP configured with **App Password**
+- Notifications trigger **only on pipeline failure**
+- Sender identity configured via Jenkins system settings
 
-Sends a detailed email when the pipeline fails.
+This ensures fast visibility and reliable alerting.
 
-Includes job name, build number, and console log link.
+---
 
-📜 Jenkinsfile (Key Features)
+## 🧪 Failure Testing Strategy
 
-Declarative pipeline syntax
+Pipeline failure alerts were tested using **controlled failure scenarios**, such as:
+- Forcing health check failure
+- Simulating Docker build errors
 
-Safe container redeployment (no port conflicts)
+This approach validates alerting without breaking application logic.
 
-Controlled health check logic
+---
 
-Email alerts using emailext
+## 🧠 Key Learnings
 
-Clear failure reporting
+- End-to-end CI/CD automation using Jenkins
+- Docker image lifecycle management
+- Safe container redeployment without port conflicts
+- Health checks as deployment gates
+- SMTP authentication and email troubleshooting in Jenkins
+- Debugging real CI/CD pipeline failures
 
-📧 Email Notification Setup
+---
 
-Email alerts are configured using:
+## 🔮 Future Enhancements
 
-Email Extension Plugin
+- Slack notifications
+- Multibranch Jenkins pipeline
+- Docker image push to Docker Hub
+- Separate staging and production environments
+- Automated test integration
 
-Gmail SMTP with App Password
+---
 
-Notifications are triggered only on pipeline failure
+## 👤 Author
 
-This ensures quick visibility and faster debugging.
+**Piyush Prasad**  
+Aspiring DevOps / Cloud Engineer  
 
-🧪 How Failure Testing Was Done
+- GitHub: https://github.com/piyushprasad8122-creator  
+- LinkedIn: https://www.linkedin.com/in/ppiy  
 
-To test alerting without breaking production code:
+---
 
-Health check was temporarily pointed to an invalid port
+## ⭐ Note
 
-Pipeline failed gracefully
-
-Email alert was successfully triggered
-
-This simulates real-world failure scenarios safely.
-
-🧠 Key Learnings
-
-End-to-end CI/CD automation with Jenkins
-
-Docker image lifecycle management
-
-Handling port conflicts in deployments
-
-Health checks as deployment gates
-
-SMTP and Jenkins email troubleshooting
-
-Debugging real pipeline failures
-
-📈 Future Improvements
-
-Add Slack notifications
-
-Convert to Multibranch Pipeline
-
-Push Docker images to Docker Hub
-
-Add staging & production environments
-
-Integrate automated tests
-
-👤 Author
-
-Piyush Prasad
-Aspiring DevOps / Cloud Engineer
-
-GitHub: https://github.com/piyushprasad8122-creator
-
-LinkedIn: https://www.linkedin.com/in/ppiy
+This project reflects **practical DevOps experience**, including troubleshooting, optimization, and documentation of real CI/CD challenges

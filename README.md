@@ -1,226 +1,144 @@
-Django Todo App – CI/CD with Jenkins & Docker
+🚀 Django Todo App – CI/CD with Jenkins & Docker
+
+This project demonstrates a complete CI/CD pipeline using Jenkins, Docker, and GitHub to build, deploy, monitor, and notify failures for a Django-based Todo application.
+
+It is designed as a learning + resume-ready DevOps project covering real-world CI/CD practices.
+
 📌 Project Overview
 
-This project demonstrates a complete CI/CD pipeline for a Django Todo application using:
+The pipeline automatically performs the following actions whenever code is pushed to the repository:
 
-GitHub for source code management
+Pulls source code from GitHub
 
-Jenkins for Continuous Integration
+Builds a Docker image for the Django application
 
-Docker for containerization
+Runs database migrations inside the container
 
-Ubuntu (AWS EC2) as the deployment environment
+Deploys the application using Docker
 
-The goal of this project is to build, containerize, and deploy a Django application automatically using Jenkins, while handling real-world CI/CD issues and fixing them step by step.
+Performs a health check on the running application
 
-🛠️ Tech Stack
+Sends an email notification if the pipeline fails
 
-OS: Ubuntu (AWS EC2)
+🧱 Tech Stack
 
-Language: Python
+Backend: Django 3.2
 
-Framework: Django 3.2
+CI/CD: Jenkins (Declarative Pipeline)
 
-CI Tool: Jenkins (installed via Snap)
+Containerization: Docker
 
-Containerization: Docker & Docker Compose
+Source Control: Git & GitHub
 
-Version Control: Git & GitHub
+Notifications: Jenkins Email Extension (Gmail SMTP)
 
-🏗️ Project Structure
-django-todo-cicd/
+OS: Ubuntu (EC2)
+
+📂 Repository Structure
+.
 ├── Dockerfile
-├── docker-compose.yml
+├── Jenkinsfile
 ├── manage.py
-├── todoApp/
+├── requirements.txt
 ├── todos/
-├── staticfiles/
+├── templates/
 └── README.md
-🚀 What I Built
+🔧 Jenkins Pipeline Stages
+1️⃣ Checkout Code
 
-Jenkins job that:
+Pulls the develop branch from GitHub.
 
-Pulls code from GitHub
+2️⃣ Build Docker Image
 
-Builds a Docker image
+Builds a Docker image using python:3.9 for Django compatibility.
 
-Runs Django inside a container
+3️⃣ Deploy Application
 
-Fully automated build process
+Stops and removes any existing container.
 
-CI-safe container handling (no port conflicts)
+Runs a new container on port 8000.
 
-❌ Problems Faced & How I Fixed Them
+4️⃣ Health Check
 
-This project involved real CI/CD troubleshooting. Below are the actual problems I faced and how I resolved them.
+Waits for the application to start.
 
-1️⃣ Jenkins Could Not Use Docker
+Validates the app using HTTP status codes (2xx–3xx).
 
-Problem
-Jenkins builds were failing when running Docker commands.
+Fails the pipeline if the app is unreachable.
 
-Reason
-Jenkins was installed via Snap, which:
+5️⃣ Email Notification (on Failure)
 
-Does not create a jenkins Linux user
+Sends a detailed email when the pipeline fails.
 
-Has restricted access to Docker socket by default
+Includes job name, build number, and console log link.
 
-Fix
+📜 Jenkinsfile (Key Features)
 
-sudo chmod 666 /var/run/docker.sock
-sudo systemctl restart docker
-sudo systemctl restart snap.jenkins.jenkins
+Declarative pipeline syntax
 
-This allowed Jenkins to communicate with Docker.
+Safe container redeployment (no port conflicts)
 
-2️⃣ Docker Build Failed – distutils Module Missing
+Controlled health check logic
 
-Error
+Email alerts using emailext
 
-ModuleNotFoundError: No module named 'distutils'
+Clear failure reporting
 
-Reason
+📧 Email Notification Setup
 
-Dockerfile was using python:3
+Email alerts are configured using:
 
-python:3 pulled Python 3.12
+Email Extension Plugin
 
-Django 3.2 is not compatible with Python 3.12
+Gmail SMTP with App Password
 
-Fix
-Pinned Python version in Dockerfile:
+Notifications are triggered only on pipeline failure
 
-FROM python:3.9
+This ensures quick visibility and faster debugging.
 
-Python 3.9 is fully compatible with Django 3.2.
+🧪 How Failure Testing Was Done
 
-3️⃣ Jenkins Could Not Find Dockerfile or docker-compose.yml
+To test alerting without breaking production code:
 
-Error
+Health check was temporarily pointed to an invalid port
 
-no configuration file provided: not found
+Pipeline failed gracefully
 
-Reason
-Jenkins runs builds inside its own workspace, not the home directory.
+Email alert was successfully triggered
 
-Fix
+This simulates real-world failure scenarios safely.
 
-Configured Jenkins Source Code Management (Git)
+🧠 Key Learnings
 
-Ensured the repository is cloned into Jenkins workspace
+End-to-end CI/CD automation with Jenkins
 
-Ran Docker commands from the correct directory
+Docker image lifecycle management
 
-4️⃣ Git Push Failed – Branch Mismatch
+Handling port conflicts in deployments
 
-Error
+Health checks as deployment gates
 
-error: src refspec develop does not match any
+SMTP and Jenkins email troubleshooting
 
-Reason
+Debugging real pipeline failures
 
-Commit was made on main
+📈 Future Improvements
 
-Tried to push to develop
+Add Slack notifications
 
-Fix
+Convert to Multibranch Pipeline
 
-git push origin main
-5️⃣ Docker Container Failed – Port 8000 Already in Use
+Push Docker images to Docker Hub
 
-Error
+Add staging & production environments
 
-Bind for 0.0.0.0:8000 failed: port is already allocated
-
-Reason
-
-Jenkins job started a new container on every build
-
-Old containers were never stopped
-
-Port 8000 was already occupied
-
-Fix (CI-safe & professional solution)
-Updated Jenkins Execute shell step:
-
-set -e
-
-docker stop todo-app-container || true
-docker rm todo-app-container || true
-
-docker build . -t todo-app
-
-docker run -d \
-  --name todo-app-container \
-  -p 8000:8000 \
-  todo-app
-
-This ensures:
-
-Old containers are removed
-
-Port conflicts never occur
-
-Builds are repeatable and stable
-
-✅ Final CI/CD Workflow
-
-Developer pushes code to GitHub
-
-Jenkins pulls the latest code
-
-Docker image is built
-
-Old container is removed
-
-New container is deployed
-
-Django app runs successfully
-
-🌐 Accessing the Application
-
-Once the Jenkins build is SUCCESS, access the app using:
-
-http://<EC2-PUBLIC-IP>:8000
-📚 Key Learnings
-
-Jenkins Snap vs APT differences
-
-Docker permission management
-
-Importance of pinning runtime versions
-
-Jenkins workspace vs local filesystem
-
-CI-safe container lifecycle management
-
-Real-world debugging using Jenkins Console Output
-
-📌 Why This Project Matters
-
-This project is not a simple tutorial.
-It reflects real DevOps work, including:
-
-Debugging CI failures
-
-Fixing dependency issues
-
-Handling Docker & Jenkins integration
-
-Writing production-safe CI scripts
-
-🔮 Future Improvements
-
-Convert Freestyle job to Jenkins Pipeline (Jenkinsfile)
-
-Add GitHub Webhook for auto-build
-
-Use Docker Compose for multi-container setup
-
-Deploy to cloud using Nginx + Gunicorn
+Integrate automated tests
 
 👤 Author
 
 Piyush Prasad
+Aspiring DevOps / Cloud Engineer
+
 GitHub: https://github.com/piyushprasad8122-creator
+
+LinkedIn: https://www.linkedin.com/in/ppiy
